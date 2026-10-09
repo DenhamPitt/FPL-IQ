@@ -116,6 +116,7 @@ def build_data(entry_id):
                      current_hist[-1] if current_hist else {})
     return {
         "mode": "live", "team_id": entry_id,
+        "total_players": boot.get("total_players") if type(boot.get("total_players")) is int and boot["total_players"] > 0 else None,
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "entry": {k: entry.get(k) for k in ("id", "name", "player_first_name", "player_last_name", "summary_overall_points", "summary_overall_rank", "last_deadline_total_transfers")},
         "published_gw": published_gw,
@@ -132,6 +133,40 @@ def build_data(entry_id):
     }
 
 
+
+def gameweek_results(entry_id, gameweek):
+    """Return official per-player GW points only after FPL has finalised the GW.
+
+    Provisional bonus/points must not be treated as final training labels.
+    """
+    boot = fetch("bootstrap-static/", 600)
+    event = next((v for v in boot.get("events", []) if v.get("id") == gameweek), None)
+    if not event:
+        raise ValueError("Unknown gameweek")
+    complete = bool(event.get("finished") and event.get("data_checked"))
+    if not complete:
+        return {"gameweek": gameweek, "final": False, "reason": "Waiting for FPL to finish and verify gameweek points."}
+    live = fetch(f"event/{gameweek}/live/", 43200)
+    points = {}
+    for row in live.get("elements", []):
+        pid, score = row.get("id"), row.get("stats", {}).get("total_points")
+        if type(pid) is int and type(score) in (float, int):
+            points[str(pid)] = score
+    if not points:
+        raise RuntimeError("Final player points are not available yet.")
+    manager_points = None
+    try:
+        history = fetch(f"entry/{entry_id}/history/", 600)
+        row = next((v for v in history.get("current", []) if v.get("event") == gameweek), None)
+        if row and type(row.get("points")) in (float, int):
+            manager_points = row["points"]
+    except RuntimeError:
+        pass
+    return {"gameweek": gameweek, "final": True, "points": points,
+            "manager_points": manager_points,
+            "verified_at": datetime.now(timezone.utc).isoformat()}
+
+
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, content, mime="application/json; charset=utf-8"):
         body = content if isinstance(content, bytes) else content.encode("utf-8")
@@ -145,6 +180,24 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlparse(self.path)
+        if url.path == "/api/gw-results":
+            qs = parse_qs(url.query)
+            entry_str = qs.get("entry", [str(DEFAULT_TEAM_ID)])[0]
+            gw_str = qs.get("gw", [""])[0]
+            if not re.fullmatch(r"[1-9][0-9]{0,9}", entry_str) or not re.fullmatch(r"(?:[1-9]|[1-3][0-9])", gw_str):
+                self._send(400, json.dumps({"error": "Invalid team or gameweek number."}))
+                return
+            if qs.get("demo", ["0"])[0] == "1":
+                self._send(200, json.dumps({"gameweek": int(gw_str), "final": False,
+                                            "reason": "Demo mode does not provide real match results."}))
+                return
+            try:
+                self._send(200, json.dumps(gameweek_results(int(entry_str), int(gw_str)), separators=(",", ":")))
+            except ValueError as ex:
+                self._send(400, json.dumps({"error": str(ex)}))
+            except RuntimeError as ex:
+                self._send(502, json.dumps({"error": str(ex)}))
+            return
         if url.path == "/api/data":
             qs = parse_qs(url.query)
             if qs.get("demo", ["0"])[0] == "1":
