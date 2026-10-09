@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: fpl-iq-phone
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: "echo No third-party packages needed"
+    startCommand: "python server.py"
+    autoDeployTrigger: off

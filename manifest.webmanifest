@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "FPL IQ \u2014 Personal FPL Manager",
+  "short_name": "FPL IQ",
+  "description": "Read-only Fantasy Premier League squad ratings and planning tool",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#071719",
+  "theme_color": "#081b1d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

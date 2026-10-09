@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#081b1d"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="FPL IQ"/>
+  <link rel="apple-touch-icon" href="/icon-192.png"/>
+  <link rel="manifest" href="/manifest.webmanifest"/>
+  <title>FPL AI Manager — Team 144616</title>
+  <link rel="stylesheet" href="/styles.css"/>
+</head><body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="logo"><div class="logo-mark">✦</div><div><strong>FPL<span>IQ</span></strong><small>PERSONAL MANAGER</small></div></div>
+      <nav id="tabs" aria-label="Main navigation">
+        <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="squad">My Squad</button>
+        <button class="tab" data-tab="planner">GW Planner</button>
+        <button class="tab" data-tab="transfers">Transfers</button>
+        <button class="tab" data-tab="chips">Chip Strategy</button>
+      </nav>
+      <div class="header-actions"><span class="live-label" id="connection-label"><i></i>Loading</span><button id="refresh" class="subtle-btn">↻ Refresh</button></div>
+    </header>
+
+    <main>
+      <section class="welcome">
+        <div><div class="eyebrow">YOUR FANTASY FOOTBALL COMMAND CENTRE</div>
+          <h1 id="greeting">Your edge, every gameweek<span class="period">.</span></h1>
+          <div class="intro" id="intro">Live squad analysis, future planning and chip insight — in one place.</div>
+        </div>
+        <div class="team-id-group"><label for="entry-id">FPL TEAM ID</label><div class="id-row"><input id="entry-id" type="text" inputmode="numeric" value="144616"/><button id="connect" class="primary-btn">Connect ↗</button></div><a id="fpl-link" href="https://fantasy.premierleague.com/en/entry/144616/history" target="_blank" rel="noopener">Open on FPL ↗</a></div>
+      </section>
+      <div id="error" class="error-banner hidden" role="alert"></div>
+      <div id="sample-banner" class="sample-banner hidden">DEMO DATA — all squad names and points shown here are fictional. <button id="live-retry">Try live team ↗</button></div>
+      <div id="loading" class="loading"><div class="loader"></div><div>Connecting to FPL public data…</div><span>First connection may take a moment.</span></div>
+      <div id="content" class="hidden"></div>
+    </main>
+    <footer>FPL IQ is an independent, unofficial, read-only planning tool. Projections are transparent estimates, not guaranteed returns. No transfers or chips are applied to FPL.</footer>
+  </div>
+  <script src="/app.js"></script>
+<script>if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) { addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {})); }</script>
+</body></html>
